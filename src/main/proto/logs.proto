@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option java_multiple_files =  true;
+option java_package = "com.logalyzes";
+option java_outer_classname = "LogServiceProto";
+
+message Empty{}
+
+message Logs{
+
+  enum LOG_LEVEL{
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+    FATAL = 4;
+  }
+
+  enum APP_ENVIRONMENT{
+    DEV = 0;
+    TEST = 1;
+    PROD = 2;
+  }
+
+  message Application{
+    string name = 1;
+    optional string version = 2;
+    optional APP_ENVIRONMENT environment = 3;
+  }
+
+
+  message LogForCreate{
+    int64 logTime = 1;
+    LOG_LEVEL level = 2;
+    string message = 3;
+    optional string stackTrace = 4;
+    Application application = 5;
+
+  }
+}
+
+message LogCreateRequest{
+  Logs.LogForCreate log = 1;
+}
+
+
+service LogService{
+  rpc Create(LogCreateRequest) returns (Empty);
+}
