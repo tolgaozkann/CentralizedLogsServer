@@ -6,9 +6,11 @@ import io.grpc.ServerBuilder;
 
 import  logalyzes.server.controllers.HealthService;
 import  logalyzes.server.repositories.HealthManager;
+import logalyzes.server.utils.Config;
 
 public class App {
     private  Server server;
+    private final int port = Config.PORT;
     HealthManager healthStatusManager;
 
     public App() {
@@ -18,11 +20,11 @@ public class App {
 
     private void _start() throws Exception {
 
-        this.server = ServerBuilder.forPort(8080)
+        this.server = ServerBuilder.forPort(this.port)
                 .addService(new HealthService(this.healthStatusManager))
                 .build()
                 .start();
-        System.out.println("Server started");
+        System.out.println("Server started at port: " + this.port);
 
 
         // Shutdown hook
