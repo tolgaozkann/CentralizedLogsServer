@@ -1,8 +1,8 @@
 syntax = "proto3";
 
 option java_multiple_files =  true;
-option java_package = "com.logalyzes";
-option java_outer_classname = "LogServiceProto";
+option java_package = "com.logalyzes.logs.dtos";
+option java_outer_classname = "LogServiceProtos";
 
 message Empty{}
 
@@ -24,8 +24,8 @@ message Logs{
 
   message Application{
     string name = 1;
-    optional string version = 2;
-    optional APP_ENVIRONMENT environment = 3;
+    string version = 2;
+    APP_ENVIRONMENT environment = 3;
   }
 
 
@@ -33,7 +33,7 @@ message Logs{
     int64 logTime = 1;
     LOG_LEVEL level = 2;
     string message = 3;
-    optional string stackTrace = 4;
+    string stackTrace = 4;
     Application application = 5;
 
   }
