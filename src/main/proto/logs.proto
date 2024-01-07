@@ -7,7 +7,7 @@ option java_outer_classname = "LogServiceProtos";
 package LogService;
 message Empty{}
 
-message Logs{
+message LogsMessages{
 
   enum LOG_LEVEL{
     DEBUG = 0;
@@ -25,10 +25,19 @@ message Logs{
 
   message Application{
     string name = 1;
-    string version = 2;
+    optional string version = 2;
     APP_ENVIRONMENT environment = 3;
   }
 
+
+  message Log{
+    int64 logTime = 1;
+    LOG_LEVEL level = 2;
+    string message = 3;
+    string stackTrace = 4;
+    Application application = 5;
+    string id = 6;
+  }
 
   message LogForCreate{
     int64 logTime = 1;
@@ -36,15 +45,27 @@ message Logs{
     string message = 3;
     string stackTrace = 4;
     Application application = 5;
-
   }
 }
 
-message LogCreateRequest{
-  Logs.LogForCreate log = 1;
+message  GetLogsRequest{
+  optional LogsMessages.Application application = 1;
+  int64 from = 2;
+  int64 to = 3;
+  int32 page = 4;
+  int32 pagesize = 5;
 }
 
+message  GetLogsResponse{
+  repeated LogsMessages.Log logs = 1;
+  int32 page = 2;
+  int32 pagesize = 3;
+  int32 total = 4;
+  int32 totalpages = 5;
+}
 
 service LogService{
-  rpc Create(LogCreateRequest) returns (Empty);
+  rpc GetLogs(GetLogsRequest) returns (GetLogsResponse);
+  rpc CreateLog(LogsMessages.LogForCreate) returns (LogsMessages.Log);
+  rpc CreateStream(stream LogsMessages.LogForCreate) returns (LogsMessages.Log);
 }
