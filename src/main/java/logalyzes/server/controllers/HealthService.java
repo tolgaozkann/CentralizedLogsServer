@@ -7,6 +7,7 @@ import com.logalyzes.health.dtos.HealthCheckRequest;
 import com.logalyzes.health.dtos.HealthCheckResponse;
 import logalyzes.server.repositories.HealthManager;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -23,11 +24,16 @@ public class HealthService extends  HealthImplBase{
             HealthCheckRequest request,
             StreamObserver<HealthCheckResponse> responseObserver
     ) {
-        HealthCheckResponse response = HealthCheckResponse.newBuilder()
-                .setStatus(this.healthStatusManager.getStatus())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        CompletableFuture.runAsync(() ->{
+            HealthCheckResponse.ServingStatus currentStatus = checkCurrentHealthStatus();
+            HealthCheckResponse response = HealthCheckResponse.newBuilder()
+                    .setStatus(currentStatus)
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+        );
+
     }
 
 
