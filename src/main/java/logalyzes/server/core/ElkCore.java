@@ -10,7 +10,6 @@ import logalyzes.server.utils.DateUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
 import  org.elasticsearch.client.RestClient;
-import  org.elasticsearch.client.RestClientBuilder;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -75,9 +74,32 @@ public class ElkCore {
      */
     public String createIndexWithDateSuffix() throws Exception {
         String indexName = DateUtils.getStringDate();
-        String response = createIndex(indexName);
-        return response;
+        return this.createIndex(indexName);
     }
+
+    /**
+     *
+     *  Storing object in index
+     *
+     */
+    public <T> T storeDoc(String index, T doc) throws Exception  {
+        CompletableFuture<IndexResponse> response = this.client.index(i -> i.index(index).document(doc));
+        return doc;
+    }
+
+
+    /**
+     *
+     *
+     *  Store object in index with current date as suffix
+     *
+     *
+     */
+    public <T> T storeDocWithDateSuffix(T obj) throws Exception {
+        String index = DateUtils.getStringDate();
+        return this.storeDoc(index, obj);
+    }
+
 
 
 
