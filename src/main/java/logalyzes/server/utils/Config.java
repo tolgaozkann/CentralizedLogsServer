@@ -9,15 +9,17 @@ public class Config {
     private  Map<String,String> env = new HashMap<String,String>();
 
     public static int PORT;
+    public static  String ELK_HOST;
 
 
     public  Config(String path) {
         this.readEnv(path);
 
         Config.PORT = System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 50051;
+        Config.ELK_HOST = System.getenv("ELK_HOST") != null ? System.getenv("ELK_HOST") : "http://localhost:9200";
     }
 
-    public   Map<String, String> readEnv(String path) {
+    public   void readEnv(String path) {
         try(BufferedReader reader = new BufferedReader(new FileReader(path))){
             String line = reader.readLine();
             while (line != null){
@@ -32,7 +34,7 @@ public class Config {
             e.printStackTrace();
         }
 
-        return  env;
+        return ;
     }
 
 }
