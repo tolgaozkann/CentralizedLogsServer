@@ -25,6 +25,7 @@ import org.elasticsearch.client.RequestOptions;
 import  org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -56,19 +57,19 @@ public class ElkCore {
 
         this.connect(this.host, this.port);
 
-        System.out.println("ELK PİNG: "+ this.ping());
+        if(!this.ping()){
+            logger.log(LOG_LEVEL.ERROR, "ELK server is not responding");
+            // Exit
+            System.exit(1);
+        }
 
-
-
+        logger.log(LOG_LEVEL.INFO, "ELK server is up and running");
     }
 
     private  void connect(String host, int port){
         RestClient _client = RestClient
                 .builder(HttpHost.create("http://"+host+":"+port))
-                .setDefaultHeaders(new Header[]{
-                        new BasicHeader("Content-Type", "application/json"),
-                        new BasicHeader("Accept", "application/json")
-                })
+                .setDefaultHeaders(new Header[]{})
                 .build();
 
         ElasticsearchTransport _transport = new RestClientTransport(
@@ -133,19 +134,14 @@ public class ElkCore {
      *
      */
     public <T> CompletableFuture<Boolean> storeDoc(String index, T obj) throws Exception  {
-
-        return this.client.index(i -> i.index(index).document(obj))
-
+        return this.client.index(i -> i.index(index).id(UUID.randomUUID().toString()).document(obj))
         .thenApply(res -> {
             System.out.println(res);
-
             return true;
         }).exceptionallyAsync(e -> {
             System.out.println(e);
-            return false;
+            throw new RuntimeException(e);
         });
-
-
 
     }
 
