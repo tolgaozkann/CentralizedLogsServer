@@ -54,56 +54,27 @@ public class ElkCore {
         this.host = Config.ELK_HOST;
         this.port = Config.ELK_PORT;
 
-        RestClient restClient = RestClient
-                .builder(HttpHost.create("http://"+this.host+":"+this.port))
-                .setDefaultHeaders(
-                        new Header[]{
-                                new BasicHeader("Content-Type", "application/json"),
-                                new BasicHeader("Accept", "application/json")
-                        })
+        this.connect(this.host, this.port);
+
+
+
+
+
+    }
+
+    private  void connect(String host, int port){
+        RestClient _client = RestClient
+                .builder(HttpHost.create("http://"+host+":"+port))
+                .setDefaultHeaders(new Header[]{
+                        new BasicHeader("Content-Type", "application/json"),
+                        new BasicHeader("Accept", "application/json")
+                })
                 .build();
-        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-        this.client = new ElasticsearchAsyncClient(transport);
-        logger.log(LOG_LEVEL.INFO,"Elasticsearch client created");
 
+        ElasticsearchTransport _transport = new RestClientTransport(
+                _client, new JacksonJsonpMapper());
 
-
-        // 5 time retry with 1 second delay
-        // Check if server is alive
-        // if not, throw terminate the program
-
-        /*
-
-        int retry = 5;
-        boolean isAlive = false;
-        while (retry>0){
-            try {
-
-                if(this.ping()){
-                    System.out.println("Elasticsearch server is alive");
-                    isAlive = true;
-                    break;
-                }
-
-            }catch (Exception e){
-                System.out.println("Server is not alive");
-
-            }finally {
-                retry--;
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-        if(!isAlive){
-            System.out.println("Server is not alive, Terminating the program");
-            System.exit(1);
-        }
-
-    */
-
+        this.client = new ElasticsearchAsyncClient(_transport);;
     }
 
 
