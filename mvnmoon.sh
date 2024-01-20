@@ -48,7 +48,7 @@ function clean() {
 rebuild_and_restart() {
     stop
     $MAVEN_BUILD
-    stop
+    start
 }
 
 trap clean SIGINT
