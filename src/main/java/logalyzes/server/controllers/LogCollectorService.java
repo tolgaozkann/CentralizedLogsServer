@@ -27,20 +27,23 @@ public class LogCollectorService extends LogServiceImplBase {
     @Override
     public void create(
             LogForCreate request,
-            StreamObserver<LogCreatedResponse> responseObserver)
-            throws Exception {
+            StreamObserver<LogCreatedResponse> responseObserver)  {
 
-        this.repo.save(new LogDto(request)).thenApply(res -> {
-                responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(res).build());
-                responseObserver.onCompleted();
-                return  true;
-        }).exceptionallyAsync(e -> {
-                String msg = "Error while processing message";
-                logger.log(LOG_LEVEL.ERROR,msg + e);
-                responseObserver.onError(e);
-                return null;
-        });
-        
+        try {
+            this.repo.save(new LogDto(request)).thenApply(res -> {
+                    responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(res).build());
+                    responseObserver.onCompleted();
+                    return  true;
+            }).exceptionallyAsync(e -> {
+                    String msg = "Error while processing message";
+                    logger.log(LOG_LEVEL.ERROR,msg + e);
+                    responseObserver.onError(e);
+                    return null;
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Override
@@ -52,14 +55,19 @@ public class LogCollectorService extends LogServiceImplBase {
             public void onNext(LogForCreate value) {
                 try {
                     // Process each incoming LogForCreate message
-                    boolean res = repo.save(new LogDto(value)).get();
+                    repo.save(new LogDto(value)).thenApply(res -> {
+                        responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(res).build());
+                        responseObserver.onCompleted();
+                        return  true;
+                    }).exceptionallyAsync(e -> {
+                        String msg = "Error while processing message";
+                        logger.log(LOG_LEVEL.ERROR,msg + e);
+                        responseObserver.onError(e);
+                        return null;
+                    });
 
-                    // Send a response for each processed message
-                    responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(res).build());
                 } catch (Exception e) {
-                    // Handle exceptions and report errors
-                    logger.log(e,"Error while processing message");
-                    responseObserver.onError(e);
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -67,6 +75,7 @@ public class LogCollectorService extends LogServiceImplBase {
             public void onError(Throwable t) {
                 System.out.println("Error");
                 responseObserver.onError(t);
+                throw new RuntimeException(t);
             }
 
             @Override
