@@ -11,12 +11,31 @@ public class Config {
     public static int PORT;
     public static  String ELK_HOST;
 
+    public static int ELK_PORT = 9200;
+
+    public  static String ELK_PASSWORD;
+
 
     public  Config(String path) {
         this.readEnv(path);
 
-        Config.PORT = System.getenv("PORT") != null ? Integer.parseInt(System.getenv("PORT")) : 50051;
-        Config.ELK_HOST = System.getenv("ELK_HOST") != null ? System.getenv("ELK_HOST") : "http://localhost:9200";
+
+
+        Config.PORT = System.getenv("PORT") == null ?
+                Integer.parseInt(env.get("PORT"))
+                :Integer.parseInt(System.getenv("PORT"));
+
+        Config.ELK_HOST = System.getenv("ELK_HOST") == null ?
+                env.get("ELK_HOST")
+                : System.getenv("ELK_HOST");
+
+        Config.ELK_PORT = System.getenv("ELK_PORT") == null ?
+                Integer.parseInt(env.get("ELK_PORT"))
+                : Integer.parseInt(System.getenv("ELK_PORT"));
+
+        Config.ELK_PASSWORD = System.getenv("ELK_PASSWORD") == null ?
+                env.get("ELK_PASSWORD")
+                : System.getenv("ELK_PASSWORD") ;
     }
 
     public   void readEnv(String path) {
@@ -24,7 +43,7 @@ public class Config {
             String line = reader.readLine();
             while (line != null){
                 String[] parts = line.split("=");
-                System.out.println(parts[0] + " " + parts[1]);
+                //System.out.println(parts[0] + " " + parts[1]);
                 if(parts.length == 2){
                     this.env.put(parts[0].trim(), parts[1].trim());
                 }
