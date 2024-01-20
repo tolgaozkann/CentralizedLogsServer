@@ -1,18 +1,24 @@
 package logalyzes.server.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logalyzes.logs.dtos.LogsMessages;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 
 import java.time.LocalDateTime;
 import  java.util.UUID;
-public class Log {
+public class LogDto {
+    @JsonProperty("id")
     private String id;
-    private  LocalDateTime logTime;
+    @JsonProperty("logTime")
+    private  String logTime;
+    @JsonProperty("level")
     private LOG_LEVEL level;
+    @JsonProperty("message")
     private String message;
+    @JsonProperty("stackTrace")
     private String stackTrace;
+    @JsonProperty("application")
     private Application application;
-
 
 
     enum APP_ENVIRONMENT{
@@ -22,8 +28,12 @@ public class Log {
     }
 
     class Application {
+
+        @JsonProperty("name")
         private  String name;
+        @JsonProperty("version")
         private  String version;
+        @JsonProperty("environment")
         private APP_ENVIRONMENT environment;
 
         public Application(String name, String version, APP_ENVIRONMENT environment) {
@@ -34,7 +44,7 @@ public class Log {
 
     }
 
-    public Log(String id, LocalDateTime logTime, LOG_LEVEL level, String message, String stackTrace, Application application) {
+    public LogDto(String id, String logTime, LOG_LEVEL level, String message, String stackTrace, Application application) {
         this.id = id;
         this.logTime = logTime;
         this.level = level;
@@ -43,9 +53,9 @@ public class Log {
         this.application = application;
     }
 
-    public Log(LogsMessages.LogForCreate log) {
+    public LogDto(LogsMessages.LogForCreate log) {
         this.id = UUID.randomUUID().toString();
-        this.logTime = LocalDateTime.now();
+        this.logTime = LocalDateTime.now().toString();
         this.level = getLogLevel(log);
         this.message = log.getMessage();
         this.stackTrace = log.getStackTrace();
@@ -87,6 +97,11 @@ public class Log {
         }
 
         return new Application(log.getApplication().getName(),log.getApplication().getVersion(),env);
+    }
+
+    @Override
+    public String toString(){
+        return String.format("LogDto: %s - %s - %s - %s - %s - %s",this.id,this.logTime,this.level,this.message,this.stackTrace,this.application);
     }
 
 }
