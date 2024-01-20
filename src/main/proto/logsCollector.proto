@@ -40,7 +40,6 @@ message LogsMessages{
   }
 
   message LogForCreate{
-    int64 logTime = 1;
     LOG_LEVEL level = 2;
     string message = 3;
     string stackTrace = 4;
@@ -48,9 +47,11 @@ message LogsMessages{
   }
 }
 
-
+message LogCreatedResponse{
+  bool created = 1;
+}
 
 service LogService{
-  rpc Create(LogsMessages.LogForCreate) returns (LogsMessages.Log);
-  rpc CreateStream(stream LogsMessages.LogForCreate) returns (LogsMessages.Log);
+  rpc Create(LogsMessages.LogForCreate) returns (LogCreatedResponse);
+  rpc CreateStream(stream LogsMessages.LogForCreate) returns (LogCreatedResponse);
 }
