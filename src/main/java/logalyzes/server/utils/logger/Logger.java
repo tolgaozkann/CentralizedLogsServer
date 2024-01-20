@@ -1,12 +1,6 @@
-package logalyzes.server.utils;
+package logalyzes.server.utils.logger;
 
-import java.util.MissingResourceException;
-
-enum LOG_LEVEL{
-    INFO,
-    WARNING,
-    ERROR,
-}
+import logalyzes.server.utils.DateUtils;
 
 public class Logger  {
     private static Logger instance = null;
@@ -29,8 +23,14 @@ public class Logger  {
      *  level: level of the message
      */
     public void log(LOG_LEVEL level,String msg) {
-        String logMsg = String.format("%s - %s - %s",DateUtils.getFullStringDate(), level.toString(), msg);
+        String logMsg = String.format("%s - %s - %s", DateUtils.getFullStringDate(), level.toString(), msg);
+        System.out.println(logMsg);
+    }
+
+    public void log(Exception e,String msg) {
+        String logMsg = String.format("%s - %s - %s", DateUtils.getFullStringDate(), LOG_LEVEL.ERROR.toString(), msg);
         System.out.print(logMsg);
+        e.printStackTrace();
     }
 
 
