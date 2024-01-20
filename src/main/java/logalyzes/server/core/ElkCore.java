@@ -1,17 +1,33 @@
 package logalyzes.server.core;
 
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
+import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.logalyzes.health.dtos.HealthCheckResponse;
 import logalyzes.server.utils.Config;
 import logalyzes.server.utils.DateUtils;
+import logalyzes.server.utils.logger.LOG_LEVEL;
+import logalyzes.server.utils.logger.Logger;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.apache.http.message.BasicHeader;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.RequestOptions;
 import  org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 public class ElkCore {
@@ -20,11 +36,10 @@ public class ElkCore {
     private  static  ElkCore instance = null;
 
     private  String host;
+    private int port;
 
-    // Elasticsearch client
-    private RestClient restClient;
-    private ElasticsearchTransport transport;
     private ElasticsearchAsyncClient client;
+    private Logger logger = Logger.getInstance();
 
 
     public static ElkCore getInstance() {
@@ -37,13 +52,58 @@ public class ElkCore {
 
     public  ElkCore() {
         this.host = Config.ELK_HOST;
+        this.port = Config.ELK_PORT;
 
-        this.restClient = RestClient
-                .builder(HttpHost.create(this.host))
-                .setDefaultHeaders(new Header[]{})
+        RestClient restClient = RestClient
+                .builder(HttpHost.create("http://"+this.host+":"+this.port))
+                .setDefaultHeaders(
+                        new Header[]{
+                                new BasicHeader("Content-Type", "application/json"),
+                                new BasicHeader("Accept", "application/json")
+                        })
                 .build();
-        this.transport = new RestClientTransport(this.restClient, new JacksonJsonpMapper());
-        this.client = new ElasticsearchAsyncClient(this.transport);
+        ElasticsearchTransport transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        this.client = new ElasticsearchAsyncClient(transport);
+        logger.log(LOG_LEVEL.INFO,"Elasticsearch client created");
+
+
+
+        // 5 time retry with 1 second delay
+        // Check if server is alive
+        // if not, throw terminate the program
+
+        /*
+
+        int retry = 5;
+        boolean isAlive = false;
+        while (retry>0){
+            try {
+
+                if(this.ping()){
+                    System.out.println("Elasticsearch server is alive");
+                    isAlive = true;
+                    break;
+                }
+
+            }catch (Exception e){
+                System.out.println("Server is not alive");
+
+            }finally {
+                retry--;
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(!isAlive){
+            System.out.println("Server is not alive, Terminating the program");
+            System.exit(1);
+        }
+
+    */
+
     }
 
 
@@ -51,10 +111,28 @@ public class ElkCore {
         return this.client;
     }
 
-    public void close() throws Exception {
-        this.transport.close();
-        this.restClient.close();
+
+    /**
+     *
+     *
+     *
+     *  Function to check index exists
+     */
+    public boolean indexExists(String indexName) throws Exception {
+        CompletableFuture<BooleanResponse> response = this.client.indices().exists(i -> i.index(indexName));
+        return response.get().value();
     }
+
+    /**
+     *
+     *
+     *  Ping the server, check if it's alive
+     */
+    public boolean ping() throws Exception {
+        CompletableFuture<BooleanResponse> response = this.client.ping();
+        return response.get().value();
+    }
+
 
     /**
      *
@@ -82,9 +160,21 @@ public class ElkCore {
      *  Storing object in index
      *
      */
-    public <T> T storeDoc(String index, T doc) throws Exception  {
-        CompletableFuture<IndexResponse> response = this.client.index(i -> i.index(index).document(doc));
-        return doc;
+    public <T> CompletableFuture<Boolean> storeDoc(String index, T obj) throws Exception  {
+
+        return this.client.index(i -> i.index(index).document(obj))
+
+        .thenApply(res -> {
+            System.out.println(res);
+
+            return true;
+        }).exceptionallyAsync(e -> {
+            System.out.println(e);
+            return false;
+        });
+
+
+
     }
 
 
@@ -95,13 +185,10 @@ public class ElkCore {
      *
      *
      */
-    public <T> T storeDocWithDateSuffix(T obj) throws Exception {
+    public <T> CompletableFuture<Boolean> storeDocWithDateSuffix(T obj) throws Exception {
         String index = DateUtils.getStringDate();
         return this.storeDoc(index, obj);
     }
-
-
-
 
 
 
