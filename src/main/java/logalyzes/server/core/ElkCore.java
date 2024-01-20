@@ -42,7 +42,7 @@ public class ElkCore {
     private Logger logger = Logger.getInstance();
 
 
-    public static ElkCore getInstance() {
+    public static ElkCore getInstance() throws Exception {
         if(instance == null) {
             instance = new ElkCore();
         }
@@ -50,13 +50,13 @@ public class ElkCore {
     }
 
 
-    public  ElkCore() {
+    public  ElkCore() throws Exception {
         this.host = Config.ELK_HOST;
         this.port = Config.ELK_PORT;
 
         this.connect(this.host, this.port);
 
-
+        System.out.println("ELK PİNG: "+ this.ping());
 
 
 
@@ -76,6 +76,7 @@ public class ElkCore {
 
         this.client = new ElasticsearchAsyncClient(_transport);;
     }
+
 
 
     public ElasticsearchAsyncClient getClient() {
