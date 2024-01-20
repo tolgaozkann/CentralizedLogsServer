@@ -1,6 +1,5 @@
 package logalyzes.server;
 
-import logalyzes.server.App;
 import logalyzes.server.utils.Config;
 
 public class Main {

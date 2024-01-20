@@ -1,34 +1,20 @@
 package logalyzes.server.core;
 
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import com.logalyzes.health.dtos.HealthCheckResponse;
 import logalyzes.server.utils.Config;
 import logalyzes.server.utils.DateUtils;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.apache.http.message.BasicHeader;
-import org.elasticsearch.client.Request;
-import org.elasticsearch.client.RequestOptions;
 import  org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
-
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 
 public class ElkCore {

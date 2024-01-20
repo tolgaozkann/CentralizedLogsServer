@@ -12,7 +12,6 @@ import logalyzes.server.utils.Config;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
 
-import java.util.logging.Level;
 
 public class App {
     private  Server server;

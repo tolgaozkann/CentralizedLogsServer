@@ -8,11 +8,9 @@ import  com.logalyzes.logs.dtos.LogsMessages.*;
 import io.grpc.stub.*;
 import logalyzes.server.dtos.LogDto;
 import logalyzes.server.repositories.LogCollectorRepository;
-import logalyzes.server.utils.Mapper;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
 
-import javax.annotation.processing.SupportedSourceVersion;
 
 public class LogCollectorService extends LogServiceImplBase {
     private LogCollectorRepository repo;
