@@ -5,26 +5,42 @@ import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
 import  logalyzes.server.controllers.HealthService;
+import logalyzes.server.controllers.LogCollectorService;
+import logalyzes.server.core.ElkCore;
 import  logalyzes.server.repositories.HealthManager;
 import logalyzes.server.utils.Config;
+import logalyzes.server.utils.logger.LOG_LEVEL;
+import logalyzes.server.utils.logger.Logger;
+
+import java.util.logging.Level;
 
 public class App {
     private  Server server;
     private final int port = Config.PORT;
     HealthManager healthStatusManager;
 
+    Logger logger = null;
+
     public App() {
         this.healthStatusManager = new HealthManager();
         this.healthStatusManager.setStatus(ServingStatus.SERVING);
+
+        // Logger
+        this.logger = Logger.getInstance();
     }
 
     private void _start() throws Exception {
 
+        // Connect to ELK
+        ElkCore elk = ElkCore.getInstance();
+
+
         this.server = ServerBuilder.forPort(this.port)
                 .addService(new HealthService(this.healthStatusManager))
+                .addService(new LogCollectorService())
                 .build()
                 .start();
-        System.out.println("Server started at port: " + this.port);
+        logger.log(LOG_LEVEL.INFO,"Server started, listening on " + this.port);
 
 
         // Shutdown hook
@@ -32,13 +48,13 @@ public class App {
             @Override
             public void run() {
                 try {
-                    System.out.println("Received shutdown request");
+                    logger.log(LOG_LEVEL.WARN,"Received shutdown request" );
                     App.this.server.shutdown();
-                    System.out.println("Successfully stopped the server");
+                    logger.log(LOG_LEVEL.WARN,"Successfully stopped the server" );
 
                 }catch (Exception e){
-                    System.err.println("Error while stopping the server");
-                    e.printStackTrace();
+                    logger.log(e,"Received shutdown request" );
+
                 }
             }
         });
