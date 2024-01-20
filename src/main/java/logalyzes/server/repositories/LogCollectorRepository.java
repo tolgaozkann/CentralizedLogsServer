@@ -8,7 +8,6 @@ import java.util.concurrent.CompletableFuture;
 public class LogCollectorRepository  {
 
     public <T> CompletableFuture<Boolean> save(T doc) throws Exception {
-        System.out.println( doc);
         ElkCore client = ElkCore.getInstance();
         return client.storeDocWithDateSuffix(doc);
     }
