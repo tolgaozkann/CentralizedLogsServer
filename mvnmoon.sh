@@ -6,6 +6,7 @@
 
 WATCH_DIR="src/"
 
+DEBOUNCE_DELAY=1
 MAVEN_BUILD="mvn clean install"
 
 RUN_APP="java -jar target/LogServer-1.0-SNAPSHOT.jar"
@@ -44,6 +45,11 @@ function clean() {
     exit 0
 }
 
+rebuild_and_restart() {
+    stop
+    $MAVEN_BUILD
+    stop
+}
 
 trap clean SIGINT
 
@@ -52,11 +58,11 @@ $MAVEN_BUILD
 start
 
 # Watch for changes in the directory
-inotifywait -m -r -e modify,create,delete --format '%w%f' $WATCH_DIR | while read file; do
-    echo "Change detected in $file"
-    stop
-    $MAVEN_BUILD
-    start
+while true; do
+    inotifywait -r -e modify,create,delete --format '%w%f' -qq $WATCH_DIR
+    echo "Change detected. Rebuilding and restarting in $DEBOUNCE_DELAY seconds..."
+    sleep $DEBOUNCE_DELAY
+    rebuild_and_restart
 done
 
 
