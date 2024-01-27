@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
 public class ElkCore {
 
     // Elk instance
-    private  static  ElkCore instance = null;
+    private  static volatile  ElkCore instance = null;
 
     private  String host;
     private int port;
@@ -31,7 +31,11 @@ public class ElkCore {
 
     public static ElkCore getInstance() throws Exception {
         if(instance == null) {
-            instance = new ElkCore();
+            synchronized (ElkCore.class) {
+                if(instance == null) {
+                    instance = new ElkCore();
+                }
+            }
         }
         return instance;
     }
