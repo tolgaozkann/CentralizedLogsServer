@@ -30,20 +30,22 @@ public class LogCollectorService extends LogServiceImplBase {
             LogForCreate request,
             StreamObserver<LogCreatedResponse> responseObserver)  {
 
-        try {
-            // Did not wait for the response
-            responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(true).build());
-            responseObserver.onCompleted();
+         CompletableFuture.runAsync(() -> {
+            try {
+                // Did not wait for the response
+                responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(true).build());
+                responseObserver.onCompleted();
 
-            // Process the message
-            this.repo.save(new LogDto(request));
+                // Process the message
+                this.repo.save(new LogDto(request));
 
-        } catch (Exception e) {
-            String msg = "Error while processing message";
-            logger.log(LOG_LEVEL.ERROR,msg + e);
-            responseObserver.onError(Status.INTERNAL.withDescription(msg).asException());
-            throw new RuntimeException(e);
-        }
+            } catch (Exception e) {
+                String msg = "Error while processing message";
+                logger.log(LOG_LEVEL.ERROR,msg + e);
+                responseObserver.onError(Status.INTERNAL.withDescription(msg).asException());
+                throw new RuntimeException(e);
+            }
+        });
 
     }
 
