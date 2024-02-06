@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_multiple_files =  true;
 option java_package = "com.logalyzes.logs.dtos";
-option java_outer_classname = "LogServiceProtos";
+option java_outer_classname = "LogCollectorServiceProtos";
 
 package LogCollector;
 message Empty{}
@@ -51,6 +51,6 @@ message LogCreatedResponse{
   bool created = 1;
 }
 
-service LogService{
+service LogCollectorService{
   rpc Create(LogsMessages.LogForCreate) returns (LogCreatedResponse);
 }
