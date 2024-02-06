@@ -2,7 +2,7 @@ package logalyzes.server.controllers;
 
 
 import com.logalyzes.logs.dtos.LogCreatedResponse;
-import com.logalyzes.logs.dtos.LogServiceGrpc.LogServiceImplBase;
+import com.logalyzes.logs.dtos.LogCollectorServiceGrpc.LogCollectorServiceImplBase;
 
 import  com.logalyzes.logs.dtos.LogsMessages.*;
 import io.grpc.Status;
@@ -15,7 +15,7 @@ import logalyzes.server.utils.logger.Logger;
 import java.util.concurrent.CompletableFuture;
 
 
-public class LogCollectorService extends LogServiceImplBase {
+public class LogCollectorService extends LogCollectorServiceImplBase {
     private LogCollectorRepository repo;
     private  Logger logger = null;
 
