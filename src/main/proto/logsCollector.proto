@@ -53,5 +53,4 @@ message LogCreatedResponse{
 
 service LogService{
   rpc Create(LogsMessages.LogForCreate) returns (LogCreatedResponse);
-  rpc CreateStream(stream LogsMessages.LogForCreate) returns (LogCreatedResponse);
 }
