@@ -49,44 +49,4 @@ public class LogCollectorService extends LogServiceImplBase {
 
     }
 
-    @Override
-    public StreamObserver<LogForCreate> createStream(
-            StreamObserver<LogCreatedResponse> responseObserver
-    ) {
-        return new StreamObserver<LogForCreate>() {
-            @Override
-            public void onNext(LogForCreate value)  {
-
-                // Did not wait for the response
-
-                try {
-                    repo.save(new LogDto(value)).thenApply((res) -> {
-                        responseObserver.onNext(LogCreatedResponse.newBuilder().setCreated(res).build());
-                        return res;
-                    }).exceptionally((e) -> {
-                        String msg = "Error while processing message";
-                        logger.log(LOG_LEVEL.ERROR,msg + e);
-                        responseObserver.onError(Status.INTERNAL.withDescription(msg).asException());
-                        throw new RuntimeException(e);
-                    });
-
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                String msg = "Error while processing message";
-                responseObserver.onError(Status.INTERNAL.withDescription(msg).asException());
-                throw new RuntimeException(t);
-            }
-
-            @Override
-            public void onCompleted() {
-                responseObserver.onCompleted();
-            }
-        };
-    }
 }
