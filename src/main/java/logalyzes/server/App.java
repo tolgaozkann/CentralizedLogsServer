@@ -1,13 +1,16 @@
 package logalyzes.server;
 
 import com.logalyzes.health.dtos.HealthCheckResponse.ServingStatus;
+import com.logalyzes.logs.dtos.LogsRequest;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
 import  logalyzes.server.controllers.HealthService;
 import logalyzes.server.controllers.LogCollectorService;
+import logalyzes.server.controllers.LogController;
 import logalyzes.server.core.ElkCore;
 import  logalyzes.server.repositories.HealthManager;
+import logalyzes.server.repositories.LogingRepository;
 import logalyzes.server.utils.Config;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
@@ -37,6 +40,7 @@ public class App {
         this.server = ServerBuilder.forPort(this.port)
                 .addService(new HealthService(this.healthStatusManager))
                 .addService(new LogCollectorService())
+                .addService(new LogController())
                 .build()
                 .start();
         logger.log(LOG_LEVEL.INFO,"Server started, listening on " + this.port);
