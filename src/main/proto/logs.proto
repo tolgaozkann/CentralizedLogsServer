@@ -6,10 +6,54 @@ option java_package = "com.logalyzes.logs.dtos";
 option java_outer_classname = "LogServiceProtos";
 import "logsCollector.proto";
 
+
+message  FilterableAvaliabilities{
+  string  name = 1;
+  int64  contain = 2;
+}
+
+message Filterable{
+  string  name = 1;
+  repeated  FilterableAvaliabilities keywords = 2 ;
+}
+
+message Index{
+  string name = 1;
+  int64 size = 2;
+}
+
+
+message ListIndexesRequest{
+}
+
+message ListIndexesResponse{
+  repeated  Index indexes= 1;
+}
+
+
+/*************************************/
+
+
+
+
+/********************************************/
+
+message SortOrder {
+  string key = 1;
+  string order = 2; // "asc" or "desc"
+}
+
 message  LogsRequest {
   int32 page = 1;
   int32  pageSize = 2;
   string  index = 3;
+
+  /* Filter By */
+  repeated  FilterableAvaliabilities filters = 4;
+
+  // Sorting fields
+  string sortBy = 5;
+  string sortOrder = 6; // "asc" for ascending, "desc" for descending
 }
 
 message  LogsResponse {
@@ -28,7 +72,13 @@ message  LogResponse {
   LogCollector.LogsMessages.Log log = 1;
 }
 
+
 service LogsService {
+  // Listing avaliable indexes
+  rpc listIndexes(ListIndexesRequest) returns (ListIndexesResponse);
+
+
+  /* List Logs*/
   rpc list(LogsRequest) returns (LogsResponse);
   rpc detail(LogRequest) returns (LogResponse);
 }

@@ -1,10 +1,14 @@
 package logalyzes.server.dtos;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.logalyzes.logs.dtos.LogsMessages;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import  java.util.UUID;
 public class LogDto {
     @JsonProperty("id")
@@ -27,16 +31,21 @@ public class LogDto {
         PROD
     }
 
-    class Application {
 
+    static class Application {
         @JsonProperty("name")
-        private  String name;
+        private String name;
         @JsonProperty("version")
-        private  String version;
+        private String version;
         @JsonProperty("environment")
         private APP_ENVIRONMENT environment;
 
-        public Application(String name, String version, APP_ENVIRONMENT environment) {
+        public Application() {
+            // Default constructor
+        }
+
+        @JsonCreator
+        public Application(@JsonProperty("name") String name, @JsonProperty("version") String version, @JsonProperty("environment") APP_ENVIRONMENT environment) {
             this.name = name;
             this.version = version;
             this.environment = environment;
@@ -44,7 +53,9 @@ public class LogDto {
 
     }
 
-    public LogDto(String id, String logTime, LOG_LEVEL level, String message, String stackTrace, Application application) {
+
+    @JsonCreator
+    public LogDto(@JsonProperty("id") String id, @JsonProperty("logTime") String logTime, @JsonProperty("level") LOG_LEVEL level, @JsonProperty("message") String message, @JsonProperty("stackTrace") String stackTrace, @JsonProperty("application") Application application) {
         this.id = id;
         this.logTime = logTime;
         this.level = level;
@@ -52,6 +63,7 @@ public class LogDto {
         this.stackTrace = stackTrace;
         this.application = application;
     }
+
 
     public LogDto(LogsMessages.LogForCreate log) {
         this.id = UUID.randomUUID().toString();
@@ -98,6 +110,66 @@ public class LogDto {
 
         return new Application(log.getApplication().getName(),log.getApplication().getVersion(),env);
     }
+
+    public LogsMessages.Log toLog() {
+        return LogsMessages.Log.newBuilder()
+                .setId(this.id)
+                .setLogTime(convertLogTimeToTimestamp(this.logTime)) // Convert logTime to timestamp
+                .setLevel(convertLogLevel(this.level))
+                .setMessage(this.message)
+                .setStackTrace(this.stackTrace)
+                .setApplication(LogsMessages.Application.newBuilder()
+                        .setName(this.application.name)
+                        .setEnvironment(convertAppEnvironment(this.application.environment))
+                        .setVersion(this.application.version)
+                        .build())
+                .build();
+    }
+
+    private long convertLogTimeToTimestamp(String logTime) {
+        // Parse the logTime string into a LocalDateTime object
+        LocalDateTime dateTime = LocalDateTime.parse(logTime, DateTimeFormatter.ISO_DATE_TIME);
+
+        // Convert LocalDateTime to a timestamp (milliseconds since Unix epoch)
+        return dateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+    }
+
+    private LogsMessages.APP_ENVIRONMENT convertAppEnvironment(LogDto.APP_ENVIRONMENT appEnv) {
+        switch (appEnv) {
+            case DEV:
+                return LogsMessages.APP_ENVIRONMENT.DEV;
+            case TEST:
+                return LogsMessages.APP_ENVIRONMENT.TEST;
+            case PROD:
+                return LogsMessages.APP_ENVIRONMENT.PROD;
+            default:
+                throw new IllegalArgumentException("Invalid environment: " + appEnv);
+        }
+    }
+
+
+
+
+
+    private LogsMessages.LOG_LEVEL convertLogLevel(LOG_LEVEL level) {
+        // Convert LOG_LEVEL to LogsMessages.LOG_LEVEL
+        switch (level) {
+            case DEBUG:
+                return LogsMessages.LOG_LEVEL.DEBUG;
+            case INFO:
+                return LogsMessages.LOG_LEVEL.INFO;
+            case WARN:
+                return LogsMessages.LOG_LEVEL.WARN;
+            case ERROR:
+                return LogsMessages.LOG_LEVEL.ERROR;
+            case FATAL:
+                return LogsMessages.LOG_LEVEL.FATAL;
+            default:
+                throw new IllegalArgumentException("Unknown log level: " + level);
+        }
+    }
+
+
 
     @Override
     public String toString(){
