@@ -10,16 +10,19 @@ public class Config {
 
     public static int PORT;
     public static  String ELK_HOST;
-
     public static int ELK_PORT = 9200;
-
     public  static String ELK_PASSWORD;
+
+    // Notification Config
+    public static String MAIL_HOST;
+    public static String MAIL_PORT;
+    public  static  String MAIL_USERNAME;
+    public  static  String MAIL_PASSWORD;
+    public  static  String MAIL_FROM;
 
 
     public  Config(String path) {
         this.readEnv(path);
-
-
 
         Config.PORT = System.getenv("PORT") == null ?
                 Integer.parseInt(env.get("PORT"))
@@ -36,6 +39,27 @@ public class Config {
         Config.ELK_PASSWORD = System.getenv("ELK_PASSWORD") == null ?
                 env.get("ELK_PASSWORD")
                 : System.getenv("ELK_PASSWORD") ;
+
+        // Notification config
+        Config.MAIL_HOST = System.getenv("MAIL_HOST") == null ?
+                env.get("MAIL_HOST")
+                : System.getenv("MAIL_HOST") ;
+
+        Config.MAIL_PORT = System.getenv("MAIL_PORT") == null ?
+                env.get("MAIL_PORT")
+                :System.getenv("MAIL_PORT");
+
+        Config.MAIL_USERNAME = System.getenv("MAIL_USERNAME") == null ?
+                env.get("MAIL_USERNAME")
+                : System.getenv("MAIL_USERNAME") ;
+
+        Config.MAIL_PASSWORD = System.getenv("MAIL_PASSWORD") == null ?
+                env.get("MAIL_PASSWORD")
+                : System.getenv("MAIL_PASSWORD") ;
+
+        Config.MAIL_FROM = System.getenv("MAIL_FROM") == null ?
+                env.get("MAIL_FROM")
+                : System.getenv("MAIL_FROM") ;
     }
 
     public   void readEnv(String path) {

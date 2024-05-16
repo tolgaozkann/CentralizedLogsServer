@@ -1,7 +1,6 @@
 package logalyzes.server;
 
 import com.logalyzes.health.dtos.HealthCheckResponse.ServingStatus;
-import com.logalyzes.logs.dtos.LogsRequest;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -9,11 +8,14 @@ import  logalyzes.server.controllers.HealthService;
 import logalyzes.server.controllers.LogCollectorService;
 import logalyzes.server.controllers.LogController;
 import logalyzes.server.core.ElkCore;
+import logalyzes.server.models.User;
+import logalyzes.server.models.UserDAO;
 import  logalyzes.server.repositories.HealthManager;
-import logalyzes.server.repositories.LogingRepository;
 import logalyzes.server.utils.Config;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
+
+import java.util.List;
 
 
 public class App {
