@@ -3,22 +3,18 @@ package logalyzes.server.controllers;
 import io.grpc.Status;
 import  io.grpc.stub.StreamObserver;
 
-import com.logalyzes.logs.dtos.LogsServiceGrpc;
 import com.logalyzes.logs.dtos.LogsServiceGrpc.LogsServiceImplBase;
-import  com.logalyzes.logs.dtos.*;
-import logalyzes.server.dtos.LogDto;
-import logalyzes.server.repositories.LogCollectorRepository;
+
 import logalyzes.server.repositories.LogingRepository;
 import logalyzes.server.utils.logger.LOG_LEVEL;
 import logalyzes.server.utils.logger.Logger;
 
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+
 
 
 public class LogController extends LogsServiceImplBase {
     private LogingRepository repository;
-    private Logger logger = null;
+    private Logger logger;
 
     public LogController() throws Exception {
         this.repository = new LogingRepository();
@@ -28,8 +24,8 @@ public class LogController extends LogsServiceImplBase {
     /**
      */
     public void listIndexes(
-            ListIndexesRequest request,
-            StreamObserver<ListIndexesResponse> responseObserver) {
+            com.logalyzes.logs.dtos.ListIndexesRequest request,
+            StreamObserver<com.logalyzes.logs.dtos.ListIndexesResponse> responseObserver) {
 
         this.repository.listIndexes().thenAccept(res -> {
             responseObserver.onNext(res);
@@ -51,8 +47,8 @@ public class LogController extends LogsServiceImplBase {
     /**
      */
     public void list(
-            LogsRequest request,
-            StreamObserver<LogsResponse> responseObserver)  {
+            com.logalyzes.logs.dtos.LogsRequest request,
+            StreamObserver<com.logalyzes.logs.dtos.LogsResponse> responseObserver)  {
         try {
             this.repository.list(request).thenAccept(res -> {
                 responseObserver.onNext(res);
@@ -73,8 +69,8 @@ public class LogController extends LogsServiceImplBase {
 
     /**
      */
-    public void detail(LogRequest request,
-                      StreamObserver<LogResponse> responseObserver) {
-       responseObserver.onNext(LogResponse.newBuilder().build());
+    public void detail(com.logalyzes.logs.dtos.LogRequest request,
+                       StreamObserver<com.logalyzes.logs.dtos.LogResponse> responseObserver) {
+       responseObserver.onNext(com.logalyzes.logs.dtos.LogResponse.newBuilder().build());
     }
 }
