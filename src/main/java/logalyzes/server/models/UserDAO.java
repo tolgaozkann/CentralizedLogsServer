@@ -78,6 +78,52 @@ public class UserDAO {
         return users;
     }
 
+    public User getById(int id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        User user = null;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAttentionLevels(stringToArray(rs.getString("attention_levels")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error selecting data by ID.", e);
+        }
+
+        return user;
+    }
+
+    public User getByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        User user = null;
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAttentionLevels(stringToArray(rs.getString("attention_levels")));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error selecting data by email.", e);
+        }
+
+        return user;
+    }
+
     public void update(User user) {
         String sql = "UPDATE users SET username = ?, email = ?, attention_levels = ? WHERE id = ?";
 
@@ -89,6 +135,7 @@ public class UserDAO {
             pstmt.setInt(4, user.getId());
             pstmt.executeUpdate();
         } catch (SQLException e) {
+            System.out.println(e.toString());
             throw new RuntimeException("Error updating data.", e);
         }
     }
