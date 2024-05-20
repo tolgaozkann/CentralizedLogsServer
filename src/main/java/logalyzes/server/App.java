@@ -7,6 +7,7 @@ import io.grpc.ServerBuilder;
 import  logalyzes.server.controllers.HealthService;
 import logalyzes.server.controllers.LogCollectorService;
 import logalyzes.server.controllers.LogController;
+import logalyzes.server.controllers.NotificationSettingService;
 import logalyzes.server.core.ElkCore;
 import logalyzes.server.models.User;
 import logalyzes.server.models.UserDAO;
@@ -43,8 +44,10 @@ public class App {
                 .addService(new HealthService(this.healthStatusManager))
                 .addService(new LogCollectorService())
                 .addService(new LogController())
+                .addService(new NotificationSettingService())
                 .build()
                 .start();
+
         logger.log(LOG_LEVEL.INFO,"Server started, listening on " + this.port);
 
 
