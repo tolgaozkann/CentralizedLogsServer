@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+
+option java_multiple_files =  true;
+option java_package = "com.logalyzes.logs.dtos";
+option java_outer_classname = "LogServiceProtos";
+import "logsCollector.proto";
+
+
+message  FilterableAvaliabilities{
+  string  name = 1;
+  int64  contain = 2;
+}
+
+message Filterable{
+  string  name = 1;
+  repeated  FilterableAvaliabilities keywords = 2 ;
+}
+
+message Index{
+  string name = 1;
+  int64 size = 2;
+}
+
+
+message ListIndexesRequest{
+}
+
+message ListIndexesResponse{
+  repeated  Index indexes= 1;
+}
+/********************************************/
+
+
+
+message  LogsRequest {
+  int32 page = 1;
+  int32  pageSize = 2;
+  string  index = 3;
+
+  /* Filter By */
+  repeated  FilterableAvaliabilities filters = 4;
+}
+
+message  LogsResponse {
+  repeated LogCollector.LogsMessages.Log logs = 1;
+  int32 page = 2;
+  int32 pageSize = 3;
+  int32 total = 4;
+  int32 totalPage = 5;
+}
+
+message  LogRequest {
+  string id = 1;
+}
+
+message  LogResponse {
+  LogCollector.LogsMessages.Log log = 1;
+}
+
+
+service LogsService {
+  // Listing avaliable indexes
+  rpc listIndexes(ListIndexesRequest) returns (ListIndexesResponse);
+
+  /* List Logs*/
+  rpc list(LogsRequest) returns (LogsResponse);
+  rpc detail(LogRequest) returns (LogResponse);
+}

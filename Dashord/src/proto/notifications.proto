@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package notification;
+option java_multiple_files =  true;
+option java_package = "com.logalyzes.notifications.dtos";
+option java_outer_classname = "NotificationsSetting";
+
+message User{
+  int32  id = 1;
+  string username = 2;
+  string email = 3;
+  repeated int32  attentionLevels = 4;
+}
+
+
+message SetNotificationRequest {
+  string username = 1;
+  string email = 2;
+  repeated int32  attentionLevels = 3;
+}
+
+message UpdateNotificationRequest {
+  int32 user_id = 1;
+  repeated int32  attentionLevels = 2;
+}
+
+message RemoveNotificationRequest {
+  int32 user_id = 1;
+}
+
+message ListNotificationsRequest {
+
+}
+
+message ListNotificationsResponse {
+  repeated User users = 1;
+  int32 total = 4;
+}
+
+
+service NotificationService {
+  rpc ListNotifications (ListNotificationsRequest) returns (ListNotificationsResponse);
+  rpc SetNotification (SetNotificationRequest) returns (User);
+  rpc UpdateNotification (UpdateNotificationRequest) returns (User);
+  rpc RemoveNotification (RemoveNotificationRequest) returns (User);
+}

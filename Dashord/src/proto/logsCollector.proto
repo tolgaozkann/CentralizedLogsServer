@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option java_multiple_files =  true;
+option java_package = "com.logalyzes.logs.dtos";
+option java_outer_classname = "LogCollectorServiceProtos";
+
+package LogCollector;
+message Empty{}
+
+message LogsMessages{
+
+  enum LOG_LEVEL{
+    DEBUG = 0;
+    INFO = 1;
+    WARN = 2;
+    ERROR = 3;
+    FATAL = 4;
+  }
+
+  enum APP_ENVIRONMENT{
+    DEV = 0;
+    TEST = 1;
+    PROD = 2;
+  }
+
+  message Application{
+    string name = 1;
+    optional string version = 2;
+    APP_ENVIRONMENT environment = 3;
+  }
+
+
+  message Log{
+    int64 logTime = 1;
+    LOG_LEVEL level = 2;
+    string message = 3;
+    string stackTrace = 4;
+    Application application = 5;
+    string id = 6;
+  }
+
+  message LogForCreate{
+    LOG_LEVEL level = 2;
+    string message = 3;
+    string stackTrace = 4;
+    Application application = 5;
+  }
+}
+
+message LogCreatedResponse{
+  bool created = 1;
+}
+
+service LogCollectorService{
+  rpc Create(LogsMessages.LogForCreate) returns (LogCreatedResponse);
+}
