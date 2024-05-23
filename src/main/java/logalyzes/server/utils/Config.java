@@ -20,6 +20,8 @@ public class Config {
     public  static  String MAIL_PASSWORD;
     public  static  String MAIL_FROM;
 
+    public static String PREDICTOR_API_URL;
+
 
     public  Config(String path) {
         this.readEnv(path);
@@ -60,6 +62,11 @@ public class Config {
         Config.MAIL_FROM = System.getenv("MAIL_FROM") == null ?
                 env.get("MAIL_FROM")
                 : System.getenv("MAIL_FROM") ;
+
+        Config.PREDICTOR_API_URL = System.getenv("PREDICTOR_API_URL") == null ?
+                env.get("PREDICTOR_API_URL")
+                : System.getenv("PREDICTOR_API_URL");
+
     }
 
     public   void readEnv(String path) {
