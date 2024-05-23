@@ -170,6 +170,9 @@ public class LogDto {
     }
 
 
+    public String getId() {
+        return id;
+    }
 
     @Override
     public String toString(){

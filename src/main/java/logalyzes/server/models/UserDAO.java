@@ -6,10 +6,23 @@ import java.util.List;
 
 public class UserDAO {
     private static final String DB_URL = "jdbc:sqlite:Db.db";
+    private static volatile UserDAO instance;
 
     public UserDAO() {
         createTableIfNotExists();
     }
+
+    public static UserDAO getInstance() {
+        if (instance == null) {
+            synchronized (UserDAO.class) {
+                if (instance == null) {
+                    instance = new UserDAO();
+                }
+            }
+        }
+        return instance;
+    }
+
 
     private Connection connect() {
         try {
@@ -73,6 +86,41 @@ public class UserDAO {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error selecting data.", e);
+        }
+
+        return users;
+    }
+
+    public List<User> findUsersByAttentionLevels(int[] attentionLevels) {
+        List<User> users = new ArrayList<>();
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM users WHERE ");
+
+        for (int i = 0; i < attentionLevels.length; i++) {
+            if (i > 0) {
+                queryBuilder.append(" OR ");
+            }
+            queryBuilder.append("attention_levels LIKE ?");
+        }
+
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement(queryBuilder.toString())) {
+
+            for (int i = 0; i < attentionLevels.length; i++) {
+                pstmt.setString(i + 1, "%" + attentionLevels[i] + "%");
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    User user = new User();
+                    user.setId(rs.getInt("id"));
+                    user.setUsername(rs.getString("username"));
+                    user.setEmail(rs.getString("email"));
+                    user.setAttentionLevels(stringToArray(rs.getString("attention_levels")));
+                    users.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error selecting users by attention levels.", e);
         }
 
         return users;
