@@ -14,13 +14,13 @@ services:
     networks:
       - elastic
     deploy:
-        resources:
-            limits:
-                cpus: '0.50'
-                memory: 2048M
-            reservations:
-                cpus: '0.25'
-                memory: 256M
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 2048M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.11.3
@@ -34,15 +34,14 @@ services:
     networks:
       - elastic
     deploy:
-        resources:
-            limits:
-                cpus: '0.50'
-                memory: 512M
-            reservations:
-                cpus: '0.25'
-                memory: 256M
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
-    ## Kafka
   kafka:
     image: 'bitnami/kafka:3.3.1'
     container_name: kafka
@@ -54,23 +53,42 @@ services:
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_BROKER_ID=1
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@localhost:9093
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_KRAFT_CLUSTER_ID=r4zt_wrqTRuT7W2NJsB_GA
     volumes:
-      - esdata:/bitnami/kafka
-
-  kafka-ui:
-    container_name: kafka-ui
-    image: 'provectuslabs/kafka-ui:latest'
+      - kafkadata:/bitnami/kafka
     ports:
-      - "8080:8080"
+      - "9092:9092"
+      - "9093:9093"
+    networks:
+      - elastic
+
+  log-analyses-api:
+    image: logalyses/log_prediction_api:latest
+    container_name: analyses_api
     environment:
-      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=kafka:9092
-      - KAFKA_CLUSTERS_0_NAME=r4zt_wrqTRuT7W2NJsB_GA
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - KAFKA_TOPIC=log_analyses
+      - PORT=9090
+    ports:
+      - "9090:9090"
+    depends_on:
+      - kafka
+    volumes:
+      - analyses_api_data:/usr/share/analyses_api
+    networks:
+      - elastic
+
+
+
 
 volumes:
   esdata:
+    driver: local
+  kafkadata:
+    driver: local
+  analyses_api_data:
     driver: local
 
 networks:
