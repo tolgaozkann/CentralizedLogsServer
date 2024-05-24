@@ -2,7 +2,6 @@ version: '3'
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
-    container_name: elasticsearch
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
@@ -16,15 +15,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.50'
+          cpus: '1'
           memory: 2048M
         reservations:
-          cpus: '0.25'
+          cpus: '0.50'
           memory: 256M
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.11.3
-    container_name: kibana
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
     depends_on:
@@ -44,7 +42,6 @@ services:
 
   kafka:
     image: 'bitnami/kafka:3.3.1'
-    container_name: kafka
     environment:
       - KAFKA_ENABLE_KRAFT=yes
       - KAFKA_CFG_PROCESS_ROLES=broker,controller
@@ -91,15 +88,16 @@ services:
       - MAIL_USERNAME=your-email@example.com
       - MAIL_PASSWORD=your-password
       - MAIL_FROM=your-email@example.com
-
       - PREDICTOR_API_URL=http://log-analyses-api:9090
 
     ports:
       - "8888:8888"
-    
+      - "3000:3000"           # Dashbord
     depends_on:
       - elasticsearch
       - log-analyses-api
+    networks:
+      - elastic
 
 
 volumes:
