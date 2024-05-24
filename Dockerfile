@@ -1,23 +1,47 @@
-# Stage 1: Build the application
-FROM maven:3.9.6-eclipse-temurin-21-jammy AS build
+# Stage 1: Build the frontend
+FROM node:20 AS frontend-build
+WORKDIR /app/Dashboard
+
+# Copy the frontend source code
+COPY Dashboard/package*.json ./
+RUN npm install
+
+# Copy the rest of the frontend files
+COPY Dashboard/ ./
+RUN npm run build
+
+# Stage 2: Build the backend
+FROM maven:3.9.6-eclipse-temurin-21-jammy AS backend-build
 WORKDIR /app
 
-# Copy the project files
+# Copy the backend project files
 COPY pom.xml .
 COPY src ./src
-
-# Build the application
 RUN mvn clean package
 
-# Stage 2: Create the final runtime image
+# Stage 3: Create the final runtime image
 FROM openjdk:21-jdk-slim
 WORKDIR /app
 
-# Copy the built application from the build stage
-COPY --from=build /app/target/LogServer-1.0-SNAPSHOT.jar /app/app.jar
+# Install Node.js 18
+RUN apt-get update && apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
-# Expose the port the application runs on
-EXPOSE ${PORT}
+# Copy the built backend application from the backend build stage
+COPY --from=backend-build /app/target/LogServer-1.0-SNAPSHOT.jar /app/app.jar
 
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+# Copy the built frontend from the frontend build stage
+COPY --from=frontend-build /app/Dashboard/ /app/Dashboard/
+
+# Copy the .env file (ensure it exists in your Docker context)
+COPY .env /app/
+
+# Install dependencies for the frontend
+RUN cd Dashboard && npm install
+
+# Expose the ports the applications run on
+EXPOSE 8888
+EXPOSE 3000
+
+CMD ["sh", "-c", "java -jar app.jar & cd Dashboard && PORT=3000 npm start"]
