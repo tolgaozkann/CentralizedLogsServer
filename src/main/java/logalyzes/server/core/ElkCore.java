@@ -49,11 +49,14 @@ public class ElkCore {
 
         this.connect(this.host, this.port);
 
+        /*
         if(!this.ping()){
             logger.log(LOG_LEVEL.ERROR, "ELK server is not responding");
             // Exit
             System.exit(1);
         }
+        
+         */
 
         logger.log(LOG_LEVEL.INFO, "ELK server is up and running");
     }

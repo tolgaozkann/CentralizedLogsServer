@@ -1,6 +1,7 @@
 package logalyzes.server.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,6 +71,11 @@ public class Config {
     }
 
     public   void readEnv(String path) {
+        File f = new File(path);
+
+        if(!f.exists() && f.isDirectory())
+            return;
+
         try(BufferedReader reader = new BufferedReader(new FileReader(path))){
             String line = reader.readLine();
             while (line != null){

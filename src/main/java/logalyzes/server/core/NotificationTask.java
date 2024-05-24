@@ -34,9 +34,7 @@ public class NotificationTask implements  Runnable{
 
     @Override
     public void run() {
-
         if(this.isAnomany && this.needAttention){
-            
             // Retrive user has attantion level
             int[] levelToSeach = {this.level};
 
