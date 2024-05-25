@@ -1,0 +1,6 @@
+apiVersion: v2
+name: chart
+description: A Helm chart for Logalyses central log server and its dependencies including Elasticsearch, Kafka, and log-analyses-api
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

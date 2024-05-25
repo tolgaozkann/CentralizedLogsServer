@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: centralized-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: centralized-server
+  template:
+    metadata:
+      labels:
+        app: centralized-server
+    spec:
+      containers:
+        - name: centralized-server
+          image: {{ .Values.centralizedServer.image }}
+          resources:
+            limits:
+              cpu: {{ .Values.centralizedServer.resources.limits.cpu }}
+              memory: {{ .Values.centralizedServer.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.centralizedServer.resources.requests.cpu }}
+              memory: {{ .Values.centralizedServer.resources.requests.memory }}
+          env:
+            - name: ELK_HOST
+              value: "{{ .Values.centralizedServer.env.ELK_HOST }}"
+            - name: ELK_PORT
+              value: "{{ .Values.centralizedServer.env.ELK_PORT }}"
+            - name: ELK_PASSWORD
+              value: "{{ .Values.centralizedServer.env.ELK_PASSWORD }}"
+            - name: MAIL_HOST
+              value: "{{ .Values.centralizedServer.env.MAIL_HOST }}"
+            - name: MAIL_PORT
+              value: "{{ .Values.centralizedServer.env.MAIL_PORT }}"
+            - name: MAIL_USERNAME
+              value: "{{ .Values.centralizedServer.env.MAIL_USERNAME }}"
+            - name: MAIL_PASSWORD
+              value: "{{ .Values.centralizedServer.env.MAIL_PASSWORD }}"
+            - name: MAIL_FROM
+              value: "{{ .Values.centralizedServer.env.MAIL_FROM }}"
+            - name: PREDICTOR_API_URL
+              value: "{{ .Values.centralizedServer.env.PREDICTOR_API_URL }}"
+          ports:
+            - containerPort: 8888
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: centralized-server
+spec:
+  ports:
+    - name: api
+      port: 8888
+      targetPort: 8888
+    - name: dashboard
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: centralized-server

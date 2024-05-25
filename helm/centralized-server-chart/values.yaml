@@ -1,0 +1,60 @@
+elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
+    requests:
+      cpu: "0.5"
+      memory: "256Mi"
+  ports:
+    - 9200
+    - 9300
+
+kafka:
+  image: bitnami/kafka:3.3.1
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
+    requests:
+      cpu: "0.5"
+      memory: "256Mi"
+  ports:
+    - 9092
+    - 9093
+
+logAnalysesApi:
+  image: logalyses/log_prediction_api:latest
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
+    requests:
+      cpu: "0.5"
+      memory: "256Mi"
+  ports:
+    - 9090
+
+centralizedServer:
+  image: logalyses/central_log_server
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
+    requests:
+      cpu: "0.5"
+      memory: "256Mi"
+  ports:
+    - 8888
+    - 3000
+  env:
+    ELK_HOST: "elasticsearch"
+    ELK_PORT: "9200"
+    ELK_PASSWORD: "DevelopmentPassword"
+    MAIL_HOST: "smtp.example.com"
+    MAIL_PORT: "587"
+    MAIL_USERNAME: "your-email@example.com"
+    MAIL_PASSWORD: "your-password"
+    MAIL_FROM: "your-email@example.com"
+    PREDICTOR_API_URL: "http://log-analyses-api:9090"

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: log-analyses-api
+spec:
+  serviceName: "log-analyses-api"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-analyses-api
+  template:
+    metadata:
+      labels:
+        app: log-analyses-api
+    spec:
+      containers:
+        - name: log-analyses-api
+          image: {{ .Values.logAnalysesApi.image }}
+          resources:
+            limits:
+              cpu: {{ .Values.logAnalysesApi.resources.limits.cpu }}
+              memory: {{ .Values.logAnalysesApi.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.logAnalysesApi.resources.requests.cpu }}
+              memory: {{ .Values.logAnalysesApi.resources.requests.memory }}
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9092
+            - name: KAFKA_TOPIC
+              value: log_analyses
+            - name: PORT
+              value: "9090"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: analyses-api-data
+              mountPath: /usr/share/analyses_api
+      volumes:
+        - name: analyses-api-data
+          persistentVolumeClaim:
+            claimName: analyses-api-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-analyses-api
+spec:
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090
+  selector:
+    app: log-analyses-api
+    
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: analyses-api-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
