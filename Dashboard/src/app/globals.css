@@ -2,11 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* globals.css */
+
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --link-color: #bb86fc;
+  --hover-color: #3700b3;
 }
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: 'Inter', sans-serif;
+}
+
+a {
+  color: var(--link-color);
+}
+
+a:hover {
+  color: var(--hover-color);
+}
+
 
 @media (prefers-color-scheme: dark) {
   :root {

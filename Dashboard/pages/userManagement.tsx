@@ -1,20 +1,14 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  MaterialReactTable,
-  useMaterialReactTable,
-  MRT_Cell,
-  MRT_ColumnDef,
-} from 'material-react-table';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
-import { Box, Button, IconButton, TextField, Toolbar, Typography, Modal } from '@mui/material';
+import { MaterialReactTable, useMaterialReactTable, MRT_Cell, MRT_ColumnDef } from 'material-react-table';
+import { Checkbox, FormControlLabel, FormGroup, Box, Button, IconButton, TextField, Toolbar, Typography, Modal, AppBar, Container, CssBaseline, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import { User } from '@/compiled/notifications';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import Head from 'next/head';
 
-const logTypes = ['fatal', 'info', 'warning', 'debug'];
+const logTypes = ['DEBUG', 'INFO', 'WARN', 'ERROR', 'FATAL'];
 
 const UserManagement: React.FC = () => {
   const [rowData, setRowData] = useState<User[]>([]);
@@ -27,6 +21,7 @@ const UserManagement: React.FC = () => {
     email: '',
     attentionLevels: [],
   });
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -69,6 +64,7 @@ const UserManagement: React.FC = () => {
     });
     setIsEditMode(false);
     setOpen(true);
+    setError(null);
   };
 
   const handleEditRow = (rowIndex: number) => {
@@ -76,9 +72,15 @@ const UserManagement: React.FC = () => {
     setIsEditMode(true);
     setEditingRowIndex(rowIndex);
     setOpen(true);
+    setError(null);
   };
 
   const handleSaveNewRow = async () => {
+    if (newRow.attentionLevels.length === 0) {
+      setError('Please select at least one Attention Level.');
+      return;
+    }
+
     const url = '/api/notification';
     const method = isEditMode ? 'PUT' : 'POST';
 
@@ -92,9 +94,6 @@ const UserManagement: React.FC = () => {
           email: newRow.email,
           attentionLevels: newRow.attentionLevels,
         };
-
-    // Ensure no invalid numbers in attentionLevels
-    payload.attentionLevels = payload.attentionLevels.filter(level => Number.isInteger(level));
 
     try {
       const response = await fetch(url, {
@@ -170,111 +169,125 @@ const UserManagement: React.FC = () => {
     enableFullScreenToggle: false,
   });
 
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  });
+
   return (
-    <Box sx={{ width: '100%', marginTop: 2 }}>
-      <Toolbar
-        sx={{
-          pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
-          display: 'flex',
-          justifyContent: 'space-between',
-        }}
-      >
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          variant="h4"
-          id="tableTitle"
-          component="div"
+    <>
+      <Head>
+        <title>User Management - Logalyses</title>
+      </Head>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Container style={{ height: 'calc(100vh - 64px)', overflow: 'auto', maxWidth: '100%' }}>
+          <Box mt={2} height="calc(100vh - 128px)" width="100%">
+            <MaterialReactTable
+              columns={columns}
+              data={rowData}
+              enableFullScreenToggle={false}
+              muiTableContainerProps={{ style: { height: '100%', width: '100%' } }}
+            />
+          </Box>
+        </Container>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-title"
+          aria-describedby="modal-description"
         >
-          User Management
-        </Typography>
-      </Toolbar>
-      <MaterialReactTable table={table} />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2, gap: 2 }}>
-        <Button variant="contained" color="success" onClick={handleAddRow}>
-          Add
-        </Button>
-      </Box>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          boxShadow: 24,
-          p: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-        }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography id="modal-title" variant="h6" component="h2">
-              {isEditMode ? 'Edit Row' : 'Add New User'}
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography id="modal-title" variant="h6" component="h2">
+                {isEditMode ? 'Edit Row' : 'Add New User'}
+              </Typography>
+              <IconButton onClick={handleClose}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <TextField
+              label="Username"
+              value={newRow.username}
+              onChange={(event) => setNewRow({ ...newRow, username: event.target.value })}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+            />
+            <TextField
+              label="Email"
+              value={newRow.email}
+              onChange={(event) => setNewRow({ ...newRow, email: event.target.value })}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+            />
+            <FormGroup row>
+              {logTypes.map((logType, index) => (
+                <FormControlLabel
+                  key={logType}
+                  control={
+                    <Checkbox
+                      checked={newRow.attentionLevels.includes(index)}
+                      onChange={(event) => {
+                        const updatedAttentionLevels = [...newRow.attentionLevels];
+                        if (event.target.checked) {
+                          if (!updatedAttentionLevels.includes(index)) {
+                            updatedAttentionLevels.push(index);
+                          }
+                        } else {
+                          const indexPos = updatedAttentionLevels.indexOf(index);
+                          if (indexPos !== -1) {
+                            updatedAttentionLevels.splice(indexPos, 1);
+                          }
+                        }
+                        setNewRow({
+                          ...newRow,
+                          attentionLevels: updatedAttentionLevels,
+                        });
+                      }}
+                    />
+                  }
+                  label={logType}
+                />
+              ))}
+            </FormGroup>
+            {error && <Alert severity="error">{error}</Alert>}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+              <Button variant="contained" onClick={handleSaveNewRow} color="success">Save</Button>
+              <Button variant="contained" onClick={handleClose} color="inherit">Cancel</Button>
+            </Box>
+          </Box>
+        </Modal>
+        <AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
+          <Toolbar>
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Logalyses Log Management System
             </Typography>
-            <IconButton onClick={handleClose}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <TextField
-            label="Username"
-            value={newRow.username}
-            onChange={(event) => setNewRow({ ...newRow, username: event.target.value })}
-            fullWidth
-            variant="outlined"
-            margin="normal"
-          />
-          <TextField
-            label="Email"
-            value={newRow.email}
-            onChange={(event) => setNewRow({ ...newRow, email: event.target.value })}
-            fullWidth
-            variant="outlined"
-            margin="normal"
-          />
-          <FormGroup row>
-            {logTypes.map((logType, index) => (
-              <FormControlLabel
-                key={logType}
-                control={
-                  <Checkbox
-                    checked={newRow.attentionLevels.includes(index)}
-                    onChange={(event) => {
-                      const updatedAttentionLevels = [...newRow.attentionLevels];
-                      if (event.target.checked) {
-                        if (!updatedAttentionLevels.includes(index)) {
-                          updatedAttentionLevels.push(index);
-                        }
-                      } else {
-                        const indexPos = updatedAttentionLevels.indexOf(index);
-                        if (indexPos !== -1) {
-                          updatedAttentionLevels.splice(indexPos, 1);
-                        }
-                      }
-                      setNewRow({
-                        ...newRow,
-                        attentionLevels: updatedAttentionLevels,
-                      });
-                    }}
-                  />
-                }
-                label={logType}
-              />
-            ))}
-          </FormGroup>
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button variant="contained" onClick={handleSaveNewRow} color="success">Save</Button>
-            <Button variant="contained" onClick={handleClose} color="inherit">Cancel</Button>
-          </Box>
-        </Box>
-      </Modal>
-    </Box>
+            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', marginRight: "400px" }}>
+              <Button variant="contained" color="success" onClick={handleAddRow}>
+                Add
+              </Button>
+            </Box>
+            <Button color="inherit" href="/userManagement">User Management</Button>
+            <Button color="inherit" href="/logList">Log Monitor</Button>
+          </Toolbar>
+        </AppBar>
+      </ThemeProvider>
+    </>
   );
 };
 

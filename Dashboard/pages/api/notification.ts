@@ -36,7 +36,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
       break;
 
     case 'PUT':
-      const { userId, updatedAttentionLevels } = req.body;
+      const { userId, attentionLevels: updatedAttentionLevels } = req.body;
       const updateRequest = UpdateNotificationRequest.create({ userId, attentionLevels: updatedAttentionLevels });
       client.updateNotification(updateRequest, (error, response) => {
         if (error) {
